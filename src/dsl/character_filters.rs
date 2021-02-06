@@ -1,6 +1,5 @@
 use serde::ser::Serializer;
 use serde::Serialize;
-use serde_json::to_string;
 
 #[derive(PartialEq, Eq, Hash, Serialize)]
 pub struct CharacterFilter {
@@ -11,12 +10,17 @@ pub struct CharacterFilter {
 #[derive(PartialEq, Eq, Hash, Serialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 enum CharacterFilterType {
-    HTMLStrip(Vec<String>),
-    Mapping(Vec<(String, String)>),
+    HtmlStrip {
+        escaped_tags: Vec<String>
+    },
+    Mapping {
+        #[serde(serialize_with = "serialize_mappings")]
+        mappings: Vec<(String, String)>
+    },
     PatternReplace {
         pattern: String,
         replacement: String,
-        #[serde(serialize_with = "serializeFlags")]
+        #[serde(serialize_with = "serialize_flags")]
         flags: Vec<RegexFlag>,
     },
 }
@@ -52,7 +56,7 @@ impl From<&RegexFlag> for String {
     }
 }
 
-fn serializeFlags<S>(flags: &Vec<RegexFlag>, serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_flags<S>(flags: &Vec<RegexFlag>, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
@@ -64,25 +68,13 @@ where
     serializer.serialize_str(&s)
 }
 
-#[derive(PartialEq, Eq, Hash)]
-pub struct Tokenizer {
-    name: String,
-    tokenizer_type: TokenizerType,
-}
-
-#[derive(PartialEq, Eq, Hash)]
-enum TokenizerType {
-    CharacterGroup(Vec<CharacterGroups>),
-}
-
-#[derive(PartialEq, Eq, Hash)]
-enum CharacterGroups {
-    Whitespace,
-    Letter,
-    Digit,
-    Punctuation,
-    Symbol,
-    Arbitrary(char),
+fn serialize_mappings<S>(mappings: &Vec<(String, String)>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.collect_seq(mappings.iter()
+        .map(|(from, to)| format!("{} => {}", from, to))
+    )
 }
 
 #[cfg(test)]
@@ -102,6 +94,39 @@ mod tests {
             "pattern": "*",
             "replacement": "$1"
         });
+        assert_eq!(
+            to_value(&char_filter).unwrap(),
+            expected
+        )
+    }
+
+    #[test]
+    fn html_strip() {
+        let char_filter = CharacterFilterType::HtmlStrip {escaped_tags: vec!["b".to_owned()]};
+        let expected = json!({
+            "type": "html_strip",
+            "escaped_tags": ["b"]
+        });
+        assert_eq!(
+            to_value(&char_filter).unwrap(),
+            expected
+        )
+    }
+
+    #[test]
+    fn mapping() {
+        let char_filter = CharacterFilterType::Mapping {mappings: vec![
+            ("a".to_owned(), "b".to_owned()),
+            ("c".to_owned(), "d".to_owned())
+        ]};
+        let expected = json!({
+            "type": "mapping",
+            "mappings": [
+                "a => b",
+                "c => d"
+            ]
+        });
+
         assert_eq!(
             to_value(&char_filter).unwrap(),
             expected

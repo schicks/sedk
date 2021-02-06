@@ -1,5 +1,6 @@
 use super::token_processing::TokenFilter;
-use super::text_processing::{CharacterFilter, Tokenizer};
+use super::character_filters::CharacterFilter;
+use super::tokenizers::Tokenizer;
 
 #[derive(PartialEq, Eq, Hash)]
 pub struct Analyzer {

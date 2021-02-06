@@ -1,3 +1,5 @@
+use super::analysis::{Normalizer,Analyzer};
+
 #[derive(PartialEq, Eq)]
 struct IndexMapping {
     fields: Vec<Field>
