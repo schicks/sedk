@@ -1,13 +1,13 @@
 use serde::ser::Serializer;
 use serde::Serialize;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct CharacterFilter {
     pub name: String,
     pub character_filter_type: CharacterFilterType,
 }
 
-#[derive(PartialEq, Eq, Hash, Serialize)]
+#[derive(PartialEq, Eq, Hash, Serialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum CharacterFilterType {
     HtmlStrip {

@@ -1,13 +1,13 @@
 use serde::ser::{Serializer};
 use serde::Serialize;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct TokenFilter {
     pub name: String,
     pub filter_type: TokenFilterType
 }
 
-#[derive(PartialEq, Eq, Hash, Serialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
 #[serde(tag = "type", rename_all="snake_case")]
 pub enum TokenFilterType {
     Lowercase,
@@ -29,7 +29,7 @@ pub enum TokenFilterType {
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Serialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum StemmerLanguage {
     Arabic,
@@ -91,7 +91,7 @@ pub enum StemmerLanguage {
     Turkish
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Synonym {
     from: Vec<String>,
     to: Vec<String>

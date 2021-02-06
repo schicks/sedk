@@ -1,13 +1,13 @@
 use serde::ser::{Serializer};
 use serde::Serialize;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Tokenizer {
     pub name: String,
     pub tokenizer_type: TokenizerType,
 }
 
-#[derive(PartialEq, Eq, Hash, Serialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
 #[serde(tag = "type")]
 pub enum TokenizerType {
     #[serde(rename = "char_group")]
@@ -16,7 +16,7 @@ pub enum TokenizerType {
     },
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub enum CharacterGroups {
     Whitespace,
     Letter,

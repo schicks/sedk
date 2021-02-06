@@ -5,12 +5,12 @@ use serde::Serialize;
 use serde::ser::Serializer;
 use serde_json::json;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Analyzer {
-    name: String,
-    character_filters: Vec<CharacterFilter>,
-    tokenizer: Tokenizer,
-    token_filters: Vec<TokenFilter>
+    pub name: String,
+    pub character_filters: Vec<CharacterFilter>,
+    pub tokenizer: Tokenizer,
+    pub token_filters: Vec<TokenFilter>
 }
 
 impl Serialize for Analyzer {
@@ -25,11 +25,11 @@ impl Serialize for Analyzer {
     }
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Normalizer {
-    name: String,
-    character_filters: Vec<CharacterFilter>,
-    tokenizer: Tokenizer
+    pub name: String,
+    pub character_filters: Vec<CharacterFilter>,
+    pub tokenizer: Tokenizer
 }
 
 impl Serialize for Normalizer {
