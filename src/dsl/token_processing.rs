@@ -3,13 +3,13 @@ use serde::Serialize;
 
 #[derive(PartialEq, Eq, Hash)]
 pub struct TokenFilter {
-    name: String,
-    filter_type: TokenFilterType
+    pub name: String,
+    pub filter_type: TokenFilterType
 }
 
 #[derive(PartialEq, Eq, Hash, Serialize)]
 #[serde(tag = "type", rename_all="snake_case")]
-enum TokenFilterType {
+pub enum TokenFilterType {
     Lowercase,
     Stemmer {language: StemmerLanguage},
     SynonymGraph {
@@ -31,7 +31,7 @@ enum TokenFilterType {
 
 #[derive(PartialEq, Eq, Hash, Serialize)]
 #[serde(rename_all = "snake_case")]
-enum StemmerLanguage {
+pub enum StemmerLanguage {
     Arabic,
     Armenian,
     Basque,
@@ -92,7 +92,7 @@ enum StemmerLanguage {
 }
 
 #[derive(PartialEq, Eq, Hash)]
-struct Synonym {
+pub struct Synonym {
     from: Vec<String>,
     to: Vec<String>
 }
