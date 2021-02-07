@@ -3,9 +3,60 @@
 This is an experimental library for an opinionated wrapper around elasticsearch that will handle many of the usual tasks of maintaining a search engine. None of it is implemented yet. This document describes what will hopefully exist.
 
 ## DSL for Elasticsearch Indices
-**Status: In Progress**
+**Status: MVP**
 
 Types with equality and hashing for describing index mappings.
+
+```rust
+let normalizer = Normalizer {
+            name: "my_normalizer".to_string(),
+            character_filters: vec![CharacterFilter {
+                name: "my_char_filter".to_string(),
+                character_filter_type: CharacterFilterType::Mapping {
+                    mappings: vec![("-".to_string(), "_".to_string())],
+                },
+            }],
+            tokenizer: Tokenizer {
+                name: "my_tokenizer".to_string(),
+                tokenizer_type: TokenizerType::CharacterGroup {
+                    tokenize_on_chars: vec![CharacterGroups::Whitespace],
+                },
+            },
+        }
+
+let index = IndexMapping {
+            fields: vec![
+                Field {
+                    name: "number".to_string(),
+                    field_type: FieldType::Float,
+                    fields: vec![Field {
+                        name: "int".to_string(),
+                        field_type: FieldType::Integer,
+                        fields: vec![],
+                    }],
+                },
+                Field {
+                    name: "keyword".to_string(),
+                    field_type: FieldType::Keyword {normalizer: normalizer},
+                    fields: vec![Field {
+                        name: "text".to_string(),
+                        field_type: FieldType::Text {analyzer: Analyzer::from_normalizer(
+                            normalizer.clone(),
+                            "my_analyzer".to_string(),
+                            vec![]
+                        )},
+                        fields: vec![],
+                    }],
+                },
+            ],
+        };
+```
+
+This code is mostly untested, but it should be possible to describe basic search indices with the DSL and serialize those descriptions to the elasticsearch rest representation. 
+
+### Remaining Tasks
+* Integration testing against elasticsearch
+* Refactor shared index resources (analyzers, token filters, etc.) as references to reduce cloning
 
 ## Derive Macros for Index Mapping DSL
 **Status: Not Started**
