@@ -113,10 +113,34 @@ fn process_fields(fields: &[Field], analysis: &mut AnalysisDTO) {
         process_fields(&field.fields, analysis);
         match &field.field_type {
             FieldType::Keyword {normalizer: n} => {
+                analysis.normalizer.insert(n.name.clone(), n.clone());
+                analysis.tokenizer.insert(
+                    n.tokenizer.name.clone(), 
+                    n.tokenizer.tokenizer_type.clone()
+                );
+                for cf in &n.character_filters {
+                    analysis.char_filter.insert(cf.name.clone(), cf.character_filter_type.clone());
+                }
 
             },
             FieldType::Text {analyzer: a} => {
-
+                analysis.analyzer.insert(a.name.clone(), a.clone());
+                analysis.tokenizer.insert(
+                    a.tokenizer.name.clone(), 
+                    a.tokenizer.tokenizer_type.clone()
+                );
+                for cf in &a.character_filters {
+                    analysis.char_filter.insert(
+                        cf.name.clone(), 
+                        cf.character_filter_type.clone()
+                    );
+                }
+                for tf in &a.token_filters {
+                    analysis.filter.insert(
+                        tf.name.clone(), 
+                        tf.filter_type.clone()
+                    );
+                }
             },
             _ => ()
         };
@@ -146,6 +170,7 @@ mod tests {
         tokenizers::{CharacterGroups, Tokenizer, TokenizerType},
     };
     use serde_json::{json, to_value};
+    use pretty_assertions::assert_eq;
 
     fn keyword() -> FieldType {
         FieldType::Keyword {
@@ -200,6 +225,8 @@ mod tests {
         };
         let expected = json!({
             "analysis": {
+                "analyzer": {},
+                "filter": {},
                 "char_filter": {
                     "my_char_filter": {
                         "type": "mapping",
