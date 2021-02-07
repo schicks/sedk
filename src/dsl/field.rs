@@ -33,6 +33,7 @@ enum FieldType {
     Keyword {
         normalizer: Normalizer,
     },
+    #[serde(serialize_with = "serialize_text")]
     Text {
         analyzer: Analyzer,
     },
@@ -94,7 +95,7 @@ impl From<IndexMapping> for IndexMappingDTO {
             tokenizer: HashMap::new(),
             filter: HashMap::new(),
             normalizer: HashMap::new(),
-            analyzer: HashMap::new()
+            analyzer: HashMap::new(),
         };
 
         process_fields(&mapping.fields, &mut analysis);
@@ -112,37 +113,34 @@ fn process_fields(fields: &[Field], analysis: &mut AnalysisDTO) {
     for field in fields {
         process_fields(&field.fields, analysis);
         match &field.field_type {
-            FieldType::Keyword {normalizer: n} => {
+            FieldType::Keyword { normalizer: n } => {
                 analysis.normalizer.insert(n.name.clone(), n.clone());
-                analysis.tokenizer.insert(
-                    n.tokenizer.name.clone(), 
-                    n.tokenizer.tokenizer_type.clone()
-                );
+                analysis
+                    .tokenizer
+                    .insert(n.tokenizer.name.clone(), n.tokenizer.tokenizer_type.clone());
                 for cf in &n.character_filters {
-                    analysis.char_filter.insert(cf.name.clone(), cf.character_filter_type.clone());
+                    analysis
+                        .char_filter
+                        .insert(cf.name.clone(), cf.character_filter_type.clone());
                 }
-
-            },
-            FieldType::Text {analyzer: a} => {
+            }
+            FieldType::Text { analyzer: a } => {
                 analysis.analyzer.insert(a.name.clone(), a.clone());
-                analysis.tokenizer.insert(
-                    a.tokenizer.name.clone(), 
-                    a.tokenizer.tokenizer_type.clone()
-                );
+                analysis
+                    .tokenizer
+                    .insert(a.tokenizer.name.clone(), a.tokenizer.tokenizer_type.clone());
                 for cf in &a.character_filters {
-                    analysis.char_filter.insert(
-                        cf.name.clone(), 
-                        cf.character_filter_type.clone()
-                    );
+                    analysis
+                        .char_filter
+                        .insert(cf.name.clone(), cf.character_filter_type.clone());
                 }
                 for tf in &a.token_filters {
-                    analysis.filter.insert(
-                        tf.name.clone(), 
-                        tf.filter_type.clone()
-                    );
+                    analysis
+                        .filter
+                        .insert(tf.name.clone(), tf.filter_type.clone());
                 }
-            },
-            _ => ()
+            }
+            _ => (),
         };
     }
 }
@@ -169,33 +167,35 @@ mod tests {
         character_filters::{CharacterFilter, CharacterFilterType},
         tokenizers::{CharacterGroups, Tokenizer, TokenizerType},
     };
-    use serde_json::{json, to_value};
     use pretty_assertions::assert_eq;
+    use serde_json::{json, to_value};
 
-    fn keyword() -> FieldType {
-        FieldType::Keyword {
-            normalizer: Normalizer {
-                name: "my_normalizer".to_string(),
-                character_filters: vec![CharacterFilter {
-                    name: "my_char_filter".to_string(),
-                    character_filter_type: CharacterFilterType::Mapping {
-                        mappings: vec![("-".to_string(), "_".to_string())],
-                    },
-                }],
-                tokenizer: Tokenizer {
-                    name: "my_tokenizer".to_string(),
-                    tokenizer_type: TokenizerType::CharacterGroup {
-                        tokenize_on_chars: vec![CharacterGroups::Whitespace],
-                    },
+    fn normalizer() -> Normalizer {
+        Normalizer {
+            name: "my_normalizer".to_string(),
+            character_filters: vec![CharacterFilter {
+                name: "my_char_filter".to_string(),
+                character_filter_type: CharacterFilterType::Mapping {
+                    mappings: vec![("-".to_string(), "_".to_string())],
+                },
+            }],
+            tokenizer: Tokenizer {
+                name: "my_tokenizer".to_string(),
+                tokenizer_type: TokenizerType::CharacterGroup {
+                    tokenize_on_chars: vec![CharacterGroups::Whitespace],
                 },
             },
         }
     }
 
+    fn analyzer() -> Analyzer {
+        Analyzer::from_normalizer(&normalizer(), "my_analyzer".to_string(), vec![])
+    }
+
     #[test]
     fn keyword_serialization() {
         assert_eq!(
-            to_value(keyword()).unwrap(),
+            to_value(FieldType::Keyword {normalizer: normalizer()}).unwrap(),
             json!({
                 "type": "keyword",
                 "normalizer": "my_normalizer"
@@ -218,14 +218,26 @@ mod tests {
                 },
                 Field {
                     name: "keyword".to_string(),
-                    field_type: keyword(),
-                    fields: vec![],
+                    field_type: FieldType::Keyword {normalizer: normalizer()},
+                    fields: vec![Field {
+                        name: "text".to_string(),
+                        field_type: FieldType::Text {analyzer: analyzer()},
+                        fields: vec![],
+                    }],
                 },
             ],
         };
         let expected = json!({
             "analysis": {
-                "analyzer": {},
+                "analyzer": {
+                    "my_analyzer": {
+                        "char_filter": [
+                            "my_char_filter"
+                        ],
+                        "tokenizer": "my_tokenizer",
+                        "filter": []
+                    }
+                },
                 "filter": {},
                 "char_filter": {
                     "my_char_filter": {
@@ -266,7 +278,13 @@ mod tests {
                     "keyword": {
                         "type": "keyword",
                         "normalizer": "my_normalizer",
-                        "fields": {}
+                        "fields": {
+                            "text": {
+                                "type": "text",
+                                "analyzer": "my_analyzer",
+                                "fields": {}
+                            }
+                        }
                     }
                 }
             }

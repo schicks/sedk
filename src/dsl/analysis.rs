@@ -13,6 +13,21 @@ pub struct Analyzer {
     pub token_filters: Vec<TokenFilter>
 }
 
+impl Analyzer {
+    pub fn from_normalizer(
+        n: &Normalizer,
+        name: String,
+        token_filters: Vec<TokenFilter>
+    ) -> Analyzer {
+        Analyzer {
+            name: name,
+            token_filters: token_filters,
+            tokenizer: n.tokenizer(),
+            character_filters: n.character_filters()
+        }
+    }
+}
+
 impl Serialize for Analyzer {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer
@@ -30,6 +45,16 @@ pub struct Normalizer {
     pub name: String,
     pub character_filters: Vec<CharacterFilter>,
     pub tokenizer: Tokenizer
+}
+
+impl Normalizer {
+    fn tokenizer(&self) -> Tokenizer {
+        self.tokenizer.clone()
+    }
+
+    fn character_filters(&self) -> Vec<CharacterFilter> {
+        self.character_filters.clone()
+    }
 }
 
 impl Serialize for Normalizer {
