@@ -11,11 +11,11 @@ pub struct CharacterFilter {
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum CharacterFilterType {
     HtmlStrip {
-        escaped_tags: Vec<String>
+        escaped_tags: Vec<String>,
     },
     Mapping {
         #[serde(serialize_with = "serialize_mappings")]
-        mappings: Vec<(String, String)>
+        mappings: Vec<(String, String)>,
     },
     PatternReplace {
         pattern: String,
@@ -72,8 +72,10 @@ fn serialize_mappings<S>(mappings: &Vec<(String, String)>, serializer: S) -> Res
 where
     S: Serializer,
 {
-    serializer.collect_seq(mappings.iter()
-        .map(|(from, to)| format!("{} => {}", from, to))
+    serializer.collect_seq(
+        mappings
+            .iter()
+            .map(|(from, to)| format!("{} => {}", from, to)),
     )
 }
 
@@ -94,31 +96,29 @@ mod tests {
             "pattern": "*",
             "replacement": "$1"
         });
-        assert_eq!(
-            to_value(&char_filter).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&char_filter).unwrap(), expected)
     }
 
     #[test]
     fn html_strip() {
-        let char_filter = CharacterFilterType::HtmlStrip {escaped_tags: vec!["b".to_owned()]};
+        let char_filter = CharacterFilterType::HtmlStrip {
+            escaped_tags: vec!["b".to_owned()],
+        };
         let expected = json!({
             "type": "html_strip",
             "escaped_tags": ["b"]
         });
-        assert_eq!(
-            to_value(&char_filter).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&char_filter).unwrap(), expected)
     }
 
     #[test]
     fn mapping() {
-        let char_filter = CharacterFilterType::Mapping {mappings: vec![
-            ("a".to_owned(), "b".to_owned()),
-            ("c".to_owned(), "d".to_owned())
-        ]};
+        let char_filter = CharacterFilterType::Mapping {
+            mappings: vec![
+                ("a".to_owned(), "b".to_owned()),
+                ("c".to_owned(), "d".to_owned()),
+            ],
+        };
         let expected = json!({
             "type": "mapping",
             "mappings": [
@@ -127,9 +127,6 @@ mod tests {
             ]
         });
 
-        assert_eq!(
-            to_value(&char_filter).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&char_filter).unwrap(), expected)
     }
 }

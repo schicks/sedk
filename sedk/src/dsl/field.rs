@@ -17,16 +17,16 @@ pub struct IndexMapping {
 #[derive(PartialEq, Eq, Clone, Serialize)]
 pub struct Field {
     #[serde(skip)]
-    name: String,
+    pub name: String,
     #[serde(flatten)]
-    field_type: FieldType,
+    pub field_type: FieldType,
     #[serde(serialize_with = "serialize_fields")]
-    fields: Vec<Field>,
+    pub fields: Vec<Field>,
 }
 
 #[derive(PartialEq, Eq, Clone, Serialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
-enum FieldType {
+pub enum FieldType {
     Binary,
     Boolean,
     #[serde(serialize_with = "serialize_keyword")]
@@ -195,7 +195,10 @@ mod tests {
     #[test]
     fn keyword_serialization() {
         assert_eq!(
-            to_value(FieldType::Keyword {normalizer: normalizer()}).unwrap(),
+            to_value(FieldType::Keyword {
+                normalizer: normalizer()
+            })
+            .unwrap(),
             json!({
                 "type": "keyword",
                 "normalizer": "my_normalizer"
@@ -218,10 +221,14 @@ mod tests {
                 },
                 Field {
                     name: "keyword".to_string(),
-                    field_type: FieldType::Keyword {normalizer: normalizer()},
+                    field_type: FieldType::Keyword {
+                        normalizer: normalizer(),
+                    },
                     fields: vec![Field {
                         name: "text".to_string(),
-                        field_type: FieldType::Text {analyzer: analyzer()},
+                        field_type: FieldType::Text {
+                            analyzer: analyzer(),
+                        },
                         fields: vec![],
                     }],
                 },

@@ -1,0 +1,16 @@
+[package]
+name = "sedk_derive"
+version = "0.1.0"
+authors = ["Sam Schick <schicksw@protonmail.com>"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.26"
+quote = "1.0.9"
+syn = "1.0.69"
+
+[dev-dependencies]
+sedk = { path = "../sedk"}

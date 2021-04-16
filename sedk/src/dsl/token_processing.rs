@@ -1,21 +1,23 @@
-use serde::ser::{Serializer};
+use serde::ser::Serializer;
 use serde::Serialize;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct TokenFilter {
     pub name: String,
-    pub filter_type: TokenFilterType
+    pub filter_type: TokenFilterType,
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Serialize)]
-#[serde(tag = "type", rename_all="snake_case")]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum TokenFilterType {
     Lowercase,
-    Stemmer {language: StemmerLanguage},
+    Stemmer {
+        language: StemmerLanguage,
+    },
     SynonymGraph {
         expand: bool,
         lenient: bool,
-        synonyms: Vec<Synonym>
+        synonyms: Vec<Synonym>,
     },
     FlattenGraph,
     Reverse,
@@ -26,7 +28,7 @@ pub enum TokenFilterType {
         output_unigrams_if_no_shingles: bool,
         token_separator: String,
         filler_token: String,
-    }
+    },
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Serialize)]
@@ -88,18 +90,19 @@ pub enum StemmerLanguage {
     LightSpanish,
     Swedish,
     LightSwedish,
-    Turkish
+    Turkish,
 }
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Synonym {
     from: Vec<String>,
-    to: Vec<String>
+    to: Vec<String>,
 }
 
 impl Serialize for Synonym {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer
+    where
+        S: Serializer,
     {
         format!("{} => {}", self.from.join(","), self.to.join(",")).serialize(serializer)
     }
@@ -115,23 +118,19 @@ mod tests {
         let expected = json!({
             "type": "lowercase"
         });
-        assert_eq!(
-            to_value(&tokenizer).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&tokenizer).unwrap(), expected)
     }
 
     #[test]
     fn stemmer() {
-        let tokenizer = TokenFilterType::Stemmer {language: StemmerLanguage::Porter2};
+        let tokenizer = TokenFilterType::Stemmer {
+            language: StemmerLanguage::Porter2,
+        };
         let expected = json!({
             "type": "stemmer",
             "language": "porter2"
         });
-        assert_eq!(
-            to_value(&tokenizer).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&tokenizer).unwrap(), expected)
     }
 
     #[test]
@@ -139,12 +138,13 @@ mod tests {
         let tokenizer = TokenFilterType::SynonymGraph {
             expand: false,
             lenient: true,
-            synonyms: vec![
-                Synonym {
-                    from: vec!["short", "small", "little"].iter().map(|s| s.to_string()).collect(),
-                    to: vec!["small"].iter().map(|s| s.to_string()).collect()
-                }
-            ]
+            synonyms: vec![Synonym {
+                from: vec!["short", "small", "little"]
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect(),
+                to: vec!["small"].iter().map(|s| s.to_string()).collect(),
+            }],
         };
         let expected = json!({
             "type": "synonym_graph",
@@ -154,10 +154,7 @@ mod tests {
                 "short,small,little => small"
             ]
         });
-        assert_eq!(
-            to_value(&tokenizer).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&tokenizer).unwrap(), expected)
     }
 
     #[test]
@@ -168,7 +165,7 @@ mod tests {
             min_shingle_size: 1,
             output_unigrams: false,
             output_unigrams_if_no_shingles: true,
-            token_separator: "_".to_string()
+            token_separator: "_".to_string(),
         };
         let expected = json!({
             "type": "shingle",
@@ -179,9 +176,6 @@ mod tests {
             "output_unigrams_if_no_shingles": true,
             "token_separator": "_"
         });
-        assert_eq!(
-            to_value(&tokenizer).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&tokenizer).unwrap(), expected)
     }
 }

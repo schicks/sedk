@@ -1,4 +1,4 @@
-use serde::ser::{Serializer};
+use serde::ser::Serializer;
 use serde::Serialize;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
@@ -7,12 +7,24 @@ pub struct Tokenizer {
     pub tokenizer_type: TokenizerType,
 }
 
+const DEFAULT_TOKENIZER_NAME: &'static str = "sedk_default_tokenizer";
+impl Default for Tokenizer {
+    fn default() -> Self {
+        Tokenizer {
+            name: DEFAULT_TOKENIZER_NAME.to_owned(),
+            tokenizer_type: TokenizerType::CharacterGroup {
+                tokenize_on_chars: vec![CharacterGroups::Whitespace],
+            },
+        }
+    }
+}
+
 #[derive(PartialEq, Eq, Hash, Clone, Serialize)]
 #[serde(tag = "type")]
 pub enum TokenizerType {
     #[serde(rename = "char_group")]
     CharacterGroup {
-        tokenize_on_chars: Vec<CharacterGroups>
+        tokenize_on_chars: Vec<CharacterGroups>,
     },
 }
 
@@ -28,7 +40,8 @@ pub enum CharacterGroups {
 
 impl Serialize for CharacterGroups {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer
+    where
+        S: Serializer,
     {
         match self {
             CharacterGroups::Whitespace => "whitespace".to_string(),
@@ -37,7 +50,8 @@ impl Serialize for CharacterGroups {
             CharacterGroups::Punctuation => "punctuation".to_string(),
             CharacterGroups::Symbol => "symbol".to_string(),
             CharacterGroups::Arbitrary(c) => c.to_string(),
-        }.serialize(serializer)
+        }
+        .serialize(serializer)
     }
 }
 
@@ -52,8 +66,8 @@ mod tests {
                 CharacterGroups::Whitespace,
                 CharacterGroups::Punctuation,
                 CharacterGroups::Arbitrary('-'),
-                CharacterGroups::Arbitrary('\n')
-            ]
+                CharacterGroups::Arbitrary('\n'),
+            ],
         };
         let expected = json!({
             "type": "char_group",
@@ -64,9 +78,6 @@ mod tests {
                 "\n"
             ]
         });
-        assert_eq!(
-            to_value(&tokenizer).unwrap(),
-            expected
-        )
+        assert_eq!(to_value(&tokenizer).unwrap(), expected)
     }
 }
