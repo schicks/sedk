@@ -1,13 +1,13 @@
 use serde::ser::Serializer;
 use serde::Serialize;
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct CharacterFilter {
     pub name: String,
     pub character_filter_type: CharacterFilterType,
 }
 
-#[derive(PartialEq, Eq, Hash, Serialize, Clone)]
+#[derive(PartialEq, Eq, Hash, Serialize, Clone, Debug)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum CharacterFilterType {
     HtmlStrip {
@@ -25,7 +25,7 @@ pub enum CharacterFilterType {
     },
 }
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub enum RegexFlag {
     // https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#field.summary
     CannonEq,

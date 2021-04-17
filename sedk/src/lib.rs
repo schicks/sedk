@@ -1,10 +1,7 @@
 #![allow(dead_code)]
 mod dsl;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+pub use dsl::{
+    primitives::IntoFields,
+    field::{Field, FieldType, Indexable, IndexMapping},
+    analysis::{Analyzer, Normalizer}
+};

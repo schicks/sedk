@@ -59,9 +59,27 @@ This code is mostly untested, but it should be possible to describe basic search
 * Refactor shared index resources (analyzers, token filters, etc.) as references to reduce cloning
 
 ## Derive Macros for Index Mapping DSL
-**Status: Not Started**
+**Status: MVP**
 
 Macros for generating index mappings based on a struct representing a record for that index.
+
+There are two related derivable traits; `IntoFields` and `Indexable`. `IntoFields` constructs a `Vec<Field>` representing index mappings for the fields of the given struct based on a name prefix (to allow nesting). `Indexable` constructs an `IndexMapping` for a struct that can be sent to elasticsearch directly.
+
+Any struct implementing `IntoFields` _could_ trivially implement `Indexable`, but it wouldn't always make sense to do so, for instance in the case of primitive types. deriving `Indexable` is more a sign of intent to index a particular struct.
+
+```rust
+#[derive(IntoFields, Indexable)]
+struct ToBeIndexed {
+    integer: i32,
+    textField: String
+}
+
+let index_mapping = ToBeIndexed::index_mapping();
+```
+
+### Remaining Tasks
+* attribute macros for increased flexibility of mapping definitions
+* tests for appropriate compile failures (derives on enums, nonsense attributes, etc.)
 
 ## Alias Management
 **Status: Not Started**

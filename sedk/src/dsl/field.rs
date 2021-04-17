@@ -11,10 +11,10 @@ use std::collections::HashMap;
 #[derive(PartialEq, Eq, Clone, Serialize)]
 #[serde(into = "IndexMappingDTO")]
 pub struct IndexMapping {
-    fields: Vec<Field>,
+    pub fields: Vec<Field>,
 }
 
-#[derive(PartialEq, Eq, Clone, Serialize)]
+#[derive(PartialEq, Eq, Clone, Serialize, Debug)]
 pub struct Field {
     #[serde(skip)]
     pub name: String,
@@ -24,7 +24,7 @@ pub struct Field {
     pub fields: Vec<Field>,
 }
 
-#[derive(PartialEq, Eq, Clone, Serialize)]
+#[derive(PartialEq, Eq, Clone, Serialize, Debug)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum FieldType {
     Binary,
@@ -78,7 +78,7 @@ where
     map.end()
 }
 
-trait Indexable {
+pub trait Indexable {
     fn index_mapping() -> IndexMapping;
 }
 

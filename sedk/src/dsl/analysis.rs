@@ -5,7 +5,7 @@ use serde::ser::Serializer;
 use serde::Serialize;
 use serde_json::json;
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct Analyzer {
     pub name: String,
     pub character_filters: Vec<CharacterFilter>,
@@ -53,7 +53,7 @@ impl Default for Analyzer {
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct Normalizer {
     pub name: String,
     pub character_filters: Vec<CharacterFilter>,
