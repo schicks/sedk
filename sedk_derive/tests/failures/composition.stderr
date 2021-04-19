@@ -1,0 +1,13 @@
+error[E0599]: no function or associated item named `into_fields` found for struct `Child` in the current scope
+ --> $DIR/composition.rs:9:10
+  |
+4 | pub struct Child {
+  | ---------------- function or associated item `into_fields` not found for this
+...
+9 | #[derive(IntoFields)]
+  |          ^^^^^^^^^^ function or associated item not found in `Child`
+  |
+  = help: items from traits can only be used if the trait is implemented and in scope
+  = note: the following trait defines an item `into_fields`, perhaps you need to implement it:
+          candidate #1: `IntoFields`
+  = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
